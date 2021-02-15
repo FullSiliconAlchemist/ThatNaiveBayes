@@ -7,20 +7,23 @@ import re
 
 data = pd.read_csv("all_sentiment_shuffled.txt", sep="\t")
 
+np_data = data.to_numpy()
+
 # TASK 1
 num_neg = 0
 num_pos = 0
 
-for index, row in data.iterrows():
-    data_class = [row[0].split(" ", 1)[1].split(" ", 2)[0]]
+# Best not to iterate over dataframes, should convert large datasets to vectors
+for x in range(np_data.shape[0]):
+    data_class = np_data[x][0].split(" ", 1)[1].split(" ", 2)[0]
     # Count number of classes
-    if data_class[0] == 'neg':
+    if data_class == 'neg':
         num_neg += 1
-    elif data_class[0] == 'pos':
+    elif data_class == 'pos':
         num_pos += 1
 
 # Split data into two groups, one for training one for testing
-training = math.floor(data.shape[0] * 0.8)
+training = math.floor(np_data.shape[0] * 0.8)
 
 # Slicing of different data groups
 training_data = data.iloc[:training]
@@ -29,11 +32,11 @@ testing_data = data.iloc[training:]
 training_data_arr = []
 
 # Remove unnecessary columns and format into multi-dimensional array
-for index, row in training_data.iterrows():
+for x in range(training):
     # Get class
-    data_class = [row[0].split(" ", 1)[1].split(" ", 2)[0]]
+    data_class = [np_data[x][0].split(" ", 1)[1].split(" ", 2)[0]]
     # Get data and remove all non-words, then split by spaces
-    fields = row[0].split(" ", 1)[1].split(" ", 2)[2]
+    fields = np_data[x][0].split(" ", 1)[1].split(" ", 2)[2]
     data_fields = re.sub('[\W_]+[ ]', '', fields).split(" ")
     data_class.append(data_fields)
     training_data_arr.append(data_class)
