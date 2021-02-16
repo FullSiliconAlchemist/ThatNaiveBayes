@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt; plt.rcdefaults()
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import math
 import re
 
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
-from collections import Counter
+from sklearn.tree import DecisionTreeClassifier
 
 
 # Task 1 method for plotting frequencies
@@ -47,16 +46,6 @@ np_data = data.to_numpy()
 plot_frequencies(np_data)
 print('Plotting complete')
 
-
-# Multinomial Naive bayes classification
-# P(Negative | W1 AND W2 AND W3 AND ... WN) = P(Negative) * P(W1 | Negative) * P(W2 | Negative)
-# P(W1 | Negative) = (# of times W1 appears in training data of negative class) / (# of words)
-# [
-#   ('W1', 10),
-#   ('W2', 12),
-#   etc...
-# ]
-
 refactored_data = []
 
 # Remove unnecessary columns and format into multi-dimensional array
@@ -83,14 +72,39 @@ all_features = vectorizer.fit_transform(df.CONTENT)
 X_train, X_test, y_train, y_test = train_test_split(all_features, df.CATEGORY, test_size=0.8)
 print('Training complete')
 
+
+# TASK 2-A
+
+# Multinomial Naive bayes classification
+# P(Negative | W1 AND W2 AND W3 AND ... WN) = P(Negative) * P(W1 | Negative) * P(W2 | Negative)
+# P(W1 | Negative) = (# of times W1 appears in training data of negative class) / (# of words)
+# [
+#   ('W1', 10),
+#   ('W2', 12),
+#   etc...
+# ]
 nb = MultinomialNB()
 nb.fit(X_train, y_train)
 correct = (y_test == nb.predict(X_test)).sum()
-print(f'{correct/len(y_test)*100}% of reviews classified correctly')
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
 # print(nb.predict(X_test))
 
+# TASK 2-B
+
 # Base Decision Tree
+dt = DecisionTreeClassifier(criterion='entropy',
+                            splitter='random')
+dt.fit(X_train, y_train)
+correct = (y_test == dt.predict(X_test)).sum()
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
+
+# TASK 2-C
 
 # Optimized Decision Tree (Entropy measurements)
+dt = DecisionTreeClassifier(criterion='entropy',
+                            splitter='best')
+dt.fit(X_train, y_train)
+correct = (y_test == dt.predict(X_test)).sum()
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
 
 print('\nDone')
