@@ -5,9 +5,11 @@ import pandas as pd
 import re
 
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 
 # Task 1 method for plotting frequencies
@@ -63,15 +65,14 @@ df = pd.DataFrame(refactored_data)
 df.columns = ['CATEGORY', 'CONTENT']
 
 # Filter stop words in the english language
-vectorizer = CountVectorizer(stop_words='english')
+vectorizer = TfidfVectorizer(stop_words=None)
 
 # Create dictionary object with vocabulary and word frequency
 all_features = vectorizer.fit_transform(df.CONTENT)
 
 # Split training and test data
-X_train, X_test, y_train, y_test = train_test_split(all_features, df.CATEGORY, test_size=0.8)
-print('Training complete')
-
+X_train, X_test, y_train, y_test = train_test_split(all_features, df.CATEGORY, test_size=0.1, random_state=80)
+print('Training complete\n')
 
 # TASK 2-A
 
@@ -83,28 +84,37 @@ print('Training complete')
 #   ('W2', 12),
 #   etc...
 # ]
-nb = MultinomialNB()
+nb = MultinomialNB(alpha=0.5)
 nb.fit(X_train, y_train)
 correct = (y_test == nb.predict(X_test)).sum()
-print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
-# print(nb.predict(X_test))
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly\n')
+print(classification_report(y_test, nb.predict(X_test), target_names=['neg', 'pos']))
+print(confusion_matrix(y_test, nb.predict(X_test)))
 
 # TASK 2-B
 
 # Base Decision Tree
 dt = DecisionTreeClassifier(criterion='entropy',
-                            splitter='random')
+                            splitter='best')
 dt.fit(X_train, y_train)
 correct = (y_test == dt.predict(X_test)).sum()
-print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
+incorrect = (y_test != dt.predict(X_test))
+# print(f'{ incorrect }')
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly\n')
+print(classification_report(y_test, dt.predict(X_test), target_names=['neg', 'pos']))
+print(confusion_matrix(y_test, nb.predict(X_test)))
+
 
 # TASK 2-C
 
 # Optimized Decision Tree (Entropy measurements)
 dt = DecisionTreeClassifier(criterion='entropy',
-                            splitter='best')
+                            splitter='random')
 dt.fit(X_train, y_train)
 correct = (y_test == dt.predict(X_test)).sum()
-print(f'{ correct/len(y_test)*100 }% of reviews classified correctly')
+print(f'{ correct/len(y_test)*100 }% of reviews classified correctly\n')
+print(classification_report(y_test, dt.predict(X_test), target_names=['neg', 'pos']))
+print(confusion_matrix(y_test, nb.predict(X_test)))
+
 
 print('\nDone')
